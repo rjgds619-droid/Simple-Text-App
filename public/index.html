@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Text Saver</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    p {
+      color: #555;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 1px solid #dcdcdc;
+      border-radius: 10px;
+      font-size: 16px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 12px;
+      background: #111827;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .list {
+      margin-top: 24px;
+    }
+
+    .item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .date {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Simple Text Saver</h1>
+    <p>Type text below and save it to an online database.</p>
+
+    <textarea id="content" placeholder="Enter your text here..."></textarea>
+    <button id="saveBtn">Save</button>
+    <div class="status" id="status"></div>
+
+    <div class="list">
+      <h2>Saved Messages</h2>
+      <div id="messages"></div>
+    </div>
+  </div>
+
+  <script>
+    const contentEl = document.getElementById("content");
+    const saveBtn = document.getElementById("saveBtn");
+    const statusEl = document.getElementById("status");
+    const messagesEl = document.getElementById("messages");
+
+    async function loadMessages() {
+      try {
+        const res = await fetch("/api/messages");
+        const data = await res.json();
+
+        messagesEl.innerHTML = "";
+
+        if (!data.length) {
+          messagesEl.innerHTML = "<p>No messages yet.</p>";
+          return;
+        }
+
+        data.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "item";
+          div.innerHTML = `
+            <div>${item.content}</div>
+            <div class="date">${new Date(item.created_at).toLocaleString()}</div>
+          `;
+          messagesEl.appendChild(div);
+        });
+      } catch (err) {
+        messagesEl.innerHTML = "<p>Failed to load messages.</p>";
+      }
+    }
+
+    saveBtn.addEventListener("click", async () => {
+      const content = contentEl.value.trim();
+
+      if (!content) {
+        statusEl.textContent = "Please enter some text.";
+        return;
+      }
+
+      statusEl.textContent = "Saving...";
+
+      try {
+        const res = await fetch("/api/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ content })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          statusEl.textContent = data.error || "Failed to save.";
+          return;
+        }
+
+        statusEl.textContent = "Saved successfully.";
+        contentEl.value = "";
+        loadMessages();
+      } catch (err) {
+        statusEl.textContent = "Something went wrong.";
+      }
+    });
+
+    loadMessages();
+  </script>
+</body>
+</html>
