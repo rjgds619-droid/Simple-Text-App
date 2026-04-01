@@ -52,6 +52,7 @@ app.get("/api/messages", async (req, res) => {
     const { data, error } = await supabase
       .from("messages")
       .select("*")
+      .is("deleted_at", null)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -60,6 +61,37 @@ app.get("/api/messages", async (req, res) => {
     }
 
     res.json(data);
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+app.delete("/api/messages/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data, error } = await supabase
+      .from("messages")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", id)
+      .is("deleted_at", null)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Supabase soft delete error:", error);
+      return res.status(500).json({ error: "Failed to delete message." });
+    }
+
+    if (!data) {
+      return res.status(404).json({ error: "Message not found." });
+    }
+
+    res.json({
+      success: true,
+      message: "Message deleted successfully."
+    });
   } catch (err) {
     console.error("Server error:", err);
     res.status(500).json({ error: "Internal server error." });
