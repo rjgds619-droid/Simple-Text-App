@@ -19,7 +19,7 @@ const supabase = createClient(
 
 app.post("/api/messages", async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, user } = req.body;
 
     if (!content || !content.trim()) {
       return res.status(400).json({ error: "Content is required." });
@@ -27,7 +27,12 @@ app.post("/api/messages", async (req, res) => {
 
     const { data, error } = await supabase
       .from("messages")
-      .insert([{ content: content.trim() }])
+      .insert([
+        {
+          content: content.trim(),
+          created_by: user && user.trim() ? user.trim() : "anonymous"
+        }
+      ])
       .select()
       .single();
 
@@ -70,10 +75,14 @@ app.get("/api/messages", async (req, res) => {
 app.delete("/api/messages/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { user } = req.body || {};
 
     const { data, error } = await supabase
       .from("messages")
-      .update({ deleted_at: new Date().toISOString() })
+      .update({
+        deleted_at: new Date().toISOString(),
+        deleted_by: user && user.trim() ? user.trim() : "anonymous"
+      })
       .eq("id", id)
       .is("deleted_at", null)
       .select()
