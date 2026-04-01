@@ -5,93 +5,324 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Simple Text Saver</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f6f7fb;
-      margin: 0;
-      padding: 40px 20px;
+    :root {
+      --bg: #f4f7fb;
+      --card: rgba(255, 255, 255, 0.88);
+      --card-border: rgba(255, 255, 255, 0.7);
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #15803d;
+      --error: #dc2626;
+      --shadow: 0 20px 50px rgba(15, 23, 42, 0.10);
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
     }
 
-    .container {
-      max-width: 640px;
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      padding: 32px 16px;
+    }
+
+    .page {
+      max-width: 760px;
       margin: 0 auto;
-      background: #fff;
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+
+    .app-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero {
+      padding: 32px 32px 20px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(255, 255, 255, 0.4));
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.10);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
     }
 
     h1 {
-      margin-top: 0;
-      font-size: 28px;
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
     }
 
-    p {
-      color: #555;
+    .subtext {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+      max-width: 560px;
+    }
+
+    .content {
+      padding: 28px 32px 32px;
+    }
+
+    .composer {
+      display: grid;
+      gap: 14px;
+    }
+
+    .label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
     }
 
     textarea {
       width: 100%;
-      min-height: 120px;
-      padding: 12px;
-      border: 1px solid #dcdcdc;
-      border-radius: 10px;
+      min-height: 150px;
+      padding: 16px 18px;
+      border: 1px solid #dbe3ee;
+      border-radius: 18px;
+      font: inherit;
       font-size: 16px;
+      line-height: 1.6;
+      color: var(--text);
+      background: #ffffff;
       resize: vertical;
-      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    textarea::placeholder {
+      color: #94a3b8;
+    }
+
+    textarea:focus {
+      border-color: rgba(37, 99, 235, 0.55);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     button {
-      margin-top: 12px;
-      background: #111827;
-      color: white;
       border: none;
-      padding: 12px 18px;
-      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
       cursor: pointer;
-      font-size: 16px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
     }
 
     button:hover {
-      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(37, 99, 235, 0.26);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
     .status {
-      margin-top: 12px;
+      min-height: 22px;
       font-size: 14px;
+      font-weight: 600;
     }
 
-    .list {
-      margin-top: 24px;
+    .status.success {
+      color: var(--success);
+    }
+
+    .status.error {
+      color: var(--error);
+    }
+
+    .status.info {
+      color: var(--muted);
+    }
+
+    .list-section {
+      margin-top: 30px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(148, 163, 184, 0.16);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: #eaf1ff;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    #messages {
+      display: grid;
+      gap: 14px;
     }
 
     .item {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 10px;
+      background: #ffffff;
+      border: 1px solid #e5edf7;
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .message-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .date {
+      margin-top: 10px;
       font-size: 12px;
-      color: #6b7280;
-      margin-top: 6px;
+      color: var(--muted);
+    }
+
+    .empty-state,
+    .error-state {
+      text-align: center;
+      padding: 28px 20px;
+      border-radius: 18px;
+      border: 1px dashed #d7e0ec;
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--muted);
+    }
+
+    .empty-state strong,
+    .error-state strong {
+      display: block;
+      color: var(--text);
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 20px 12px;
+      }
+
+      .hero,
+      .content {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .actions {
+        align-items: stretch;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .section-header {
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Simple Text Saver</h1>
-    <p>Type text below and save it to an online database.</p>
+  <div class="page">
+    <div class="app-card">
+      <div class="hero">
+        <div class="eyebrow">Simple Web App</div>
+        <h1>Simple Text Saver</h1>
+        <p class="subtext">
+          Write a message, save it online, and instantly view previously submitted entries in one clean space.
+        </p>
+      </div>
 
-    <textarea id="content" placeholder="Enter your text here..."></textarea>
-    <button id="saveBtn">Save</button>
-    <div class="status" id="status"></div>
+      <div class="content">
+        <div class="composer">
+          <label class="label" for="content">Your message</label>
+          <textarea id="content" placeholder="Type your message here..."></textarea>
 
-    <div class="list">
-      <h2>Saved Messages</h2>
-      <div id="messages"></div>
+          <div class="actions">
+            <button id="saveBtn">Save Message</button>
+            <div class="status info" id="status"></div>
+          </div>
+        </div>
+
+        <div class="list-section">
+          <div class="section-header">
+            <h2>Saved Messages</h2>
+            <div class="count-badge" id="messageCount">0</div>
+          </div>
+          <div id="messages"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -100,6 +331,18 @@
     const saveBtn = document.getElementById("saveBtn");
     const statusEl = document.getElementById("status");
     const messagesEl = document.getElementById("messages");
+    const messageCountEl = document.getElementById("messageCount");
+
+    function setStatus(message, type = "info") {
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
 
     async function loadMessages() {
       try {
@@ -107,9 +350,15 @@
         const data = await res.json();
 
         messagesEl.innerHTML = "";
+        messageCountEl.textContent = Array.isArray(data) ? data.length : 0;
 
-        if (!data.length) {
-          messagesEl.innerHTML = "<p>No messages yet.</p>";
+        if (!Array.isArray(data) || !data.length) {
+          messagesEl.innerHTML = `
+            <div class="empty-state">
+              <strong>No messages yet</strong>
+              Your saved entries will appear here.
+            </div>
+          `;
           return;
         }
 
@@ -117,13 +366,19 @@
           const div = document.createElement("div");
           div.className = "item";
           div.innerHTML = `
-            <div>${item.content}</div>
+            <div class="message-text">${escapeHtml(item.content || "")}</div>
             <div class="date">${new Date(item.created_at).toLocaleString()}</div>
           `;
           messagesEl.appendChild(div);
         });
       } catch (err) {
-        messagesEl.innerHTML = "<p>Failed to load messages.</p>";
+        messageCountEl.textContent = "0";
+        messagesEl.innerHTML = `
+          <div class="error-state">
+            <strong>Unable to load messages</strong>
+            Please refresh the page and try again.
+          </div>
+        `;
       }
     }
 
@@ -131,11 +386,13 @@
       const content = contentEl.value.trim();
 
       if (!content) {
-        statusEl.textContent = "Please enter some text.";
+        setStatus("Please enter some text first.", "error");
         return;
       }
 
-      statusEl.textContent = "Saving...";
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving...";
+      setStatus("Saving your message...", "info");
 
       try {
         const res = await fetch("/api/messages", {
@@ -149,15 +406,18 @@
         const data = await res.json();
 
         if (!res.ok) {
-          statusEl.textContent = data.error || "Failed to save.";
+          setStatus(data.error || "Failed to save message.", "error");
           return;
         }
 
-        statusEl.textContent = "Saved successfully.";
+        setStatus("Saved successfully.", "success");
         contentEl.value = "";
-        loadMessages();
+        await loadMessages();
       } catch (err) {
-        statusEl.textContent = "Something went wrong.";
+        setStatus("Something went wrong. Please try again.", "error");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save Message";
       }
     });
 
